@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Primeiro Contato — Psicologia Real</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --primary:   #6A4F3C;
+    --base:      #A97450;
+    --secondary: #8C6D58;
+    --bg:        #F2E9D8;
+    --bg-alt:    #E8DCC2;
+    --text-dark: #3C2A1E;
+    --text-mid:  #6A4F3C;
+    --text-light:#8C6D58;
+    --border:    #D9CBBA;
+  }
+  html, body { height:100%; font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text-dark); }
+  body::before { content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
+    background: radial-gradient(ellipse 70% 50% at 10% 5%, rgba(106,79,60,.08) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 70% at 90% 95%, rgba(169,116,80,.07) 0%, transparent 55%); }
+  #progress-wrap { position:fixed; top:0; left:0; right:0; height:2px; background:var(--bg-alt); z-index:100; }
+  #progress-bar  { height:100%; background:var(--primary); transition:width .5s cubic-bezier(.4,0,.2,1); }
+  #header { position:fixed; top:0; left:0; right:0; padding:20px 36px 14px; display:flex; align-items:center; justify-content:space-between; z-index:50; background:linear-gradient(to bottom, var(--bg) 65%, transparent); }
+  #header .brand { font-family:'Cormorant Garamond',serif; font-size:1rem; font-weight:600; letter-spacing:.06em; color:var(--primary); text-transform:uppercase; }
+  #header .step-counter { font-size:.72rem; color:var(--text-light); letter-spacing:.1em; }
+  #stage { position:relative; z-index:1; min-height:100%; display:flex; align-items:flex-start; justify-content:center; padding:80px 24px 180px; overflow-y:auto; }
+  .q-card  { width:100%; max-width:620px; animation:fadeUp .5s cubic-bezier(.22,1,.36,1) both; }
+  .screen  { width:100%; max-width:580px; animation:fadeUp .6s cubic-bezier(.22,1,.36,1) both; }
+  @keyframes fadeUp  { from{opacity:0;transform:translateY(28px)} to{opacity:1;transform:translateY(0)} }
+  @keyframes fadeOut { to{opacity:0;transform:translateY(-20px)} }
+  .q-card.exit, .screen.exit { animation:fadeOut .3s cubic-bezier(.4,0,1,1) both; }
+  .q-number { font-size:.68rem; font-weight:500; letter-spacing:.18em; color:var(--base); text-transform:uppercase; margin-bottom:14px; }
+  .q-label  { font-family:'Cormorant Garamond',serif; font-size:clamp(1.5rem,4vw,2.1rem); font-weight:400; line-height:1.28; color:var(--primary); margin-bottom:8px; }
+  .q-sub    { font-size:.81rem; color:var(--text-light); margin-bottom:26px; line-height:1.55; }
+  .optional { font-size:.68rem; color:var(--text-light); margin-left:8px; }
+  .q-input  { width:100%; background:transparent; border:none; border-bottom:1.5px solid var(--border); padding:10px 0; font-family:'DM Sans',sans-serif; font-size:1rem; color:var(--text-dark); outline:none; transition:border-color .2s; caret-color:var(--base); }
+  .q-input::placeholder { color:var(--text-light); opacity:.6; }
+  .q-input:focus { border-color:var(--base); }
+  textarea.q-input { resize:none; height:88px; line-height:1.65; }
+  .options        { display:flex; flex-direction:column; gap:9px; }
+  .options.grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:9px; }
+  .opt { display:flex; align-items:center; gap:12px; padding:12px 16px; border:1px solid var(--border); border-radius:8px; cursor:pointer; transition:all .18s; background:rgba(242,233,216,.55); user-select:none; }
+  .opt:hover    { border-color:var(--base); background:rgba(255,255,255,.6); }
+  .opt.selected { border-color:var(--primary); background:rgba(106,79,60,.07); }
+  .opt .key { width:20px; height:20px; flex-shrink:0; border:1.5px solid var(--border); border-radius:4px; display:flex; align-items:center; justify-content:center; transition:all .18s; }
+  .opt.selected .key { background:var(--primary); border-color:var(--primary); }
+  .opt .key svg { display:none; }
+  .opt.selected .key svg { display:block; }
+  .opt label { font-size:.88rem; cursor:pointer; flex:1; line-height:1.35; color:var(--text-mid); }
+  .opt.selected label { color:var(--primary); font-weight:500; }
+  .btn-next { display:inline-flex; align-items:center; gap:9px; padding:12px 26px; background:var(--primary); color:#F2E9D8; border:none; border-radius:8px; font-family:'DM Sans',sans-serif; font-size:.88rem; font-weight:500; letter-spacing:.03em; cursor:pointer; transition:background .2s,transform .15s; text-decoration:none; }
+  .btn-next:hover { background:#4E3728; transform:translateY(-1px); }
+  .action-row { display:flex; align-items:center; gap:16px; margin-top:32px; padding-bottom:20px; }
+  .hint { font-size:.7rem; color:var(--text-light); }
+  .hint kbd { background:var(--bg-alt); border-radius:4px; padding:2px 6px; font-family:inherit; font-size:.68rem; }
+  .screen h1 { font-family:'Cormorant Garamond',serif; font-size:clamp(1.9rem,5vw,2.8rem); font-weight:400; color:var(--primary); line-height:1.18; margin-bottom:22px; }
+  .screen p  { font-size:.9rem; color:var(--text-mid); line-height:1.75; margin-bottom:18px; }
+  .badge-pill { display:inline-block; background:rgba(106,79,60,.1); color:var(--base); font-size:.68rem; letter-spacing:.14em; font-weight:600; text-transform:uppercase; padding:5px 14px; border-radius:20px; margin-bottom:18px; }
+  .welcome-box { border-left:2px solid var(--base); padding:14px 20px; background:rgba(232,220,194,.4); border-radius:0 8px 8px 0; font-size:.88rem; line-height:1.8; color:var(--text-mid); margin-bottom:22px; }
+  .signature { font-size:.74rem; color:var(--text-light); letter-spacing:.04em; }
+  .signature strong { color:var(--primary); font-weight:500; }
+  .lgpd-box { background:rgba(232,220,194,.5); border:1px solid var(--border); border-radius:8px; padding:16px 18px; margin-bottom:22px; }
+  .lgpd-check { display:flex; align-items:flex-start; gap:10px; cursor:pointer; font-size:.82rem; color:var(--text-mid); line-height:1.6; }
+  .lgpd-check input { margin-top:3px; accent-color:var(--primary); width:15px; height:15px; flex-shrink:0; cursor:pointer; }
+  .conditional-block { margin-top:18px; padding:16px; background:rgba(232,220,194,.4); border-radius:8px; border:1px dashed var(--border); }
+  #nav-arrows { position:fixed; bottom:90px; right:26px; z-index:50; display:flex; gap:8px; }
+  .nav-arr { width:34px; height:34px; border-radius:7px; border:1px solid var(--border); background:rgba(242,233,216,.7); cursor:pointer; display:flex; align-items:center; justify-content:center; color:var(--primary); transition:all .18s; }
+  .nav-arr:hover { border-color:var(--primary); }
+  .nav-arr:disabled { opacity:.25; pointer-events:none; }
+  .err-msg { font-size:.76rem; color:#b03a2e; margin-top:8px; display:none; }
+</style>
+</head>
+<body>
+<div id="progress-wrap"><div id="progress-bar" style="width:0%"></div></div>
+<div id="header">
+  <div class="brand">Psicologia Real</div>
+  <div class="step-counter" id="step-label"></div>
+</div>
+<div id="stage"></div>
+<div id="nav-arrows">
+  <button class="nav-arr" id="btn-prev" disabled>
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+  </button>
+  <button class="nav-arr" id="btn-next-arr">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+  </button>
+</div>
+
+<script>
+const QUESTIONS = [
+  { type: 'intro' },
+  { id:'nome',             type:'text',     required:true,  label:'Qual é o seu nome completo?', placeholder:'Digite seu nome…' },
+  { id:'nascimento',       type:'text',     required:true,  label:'Data de nascimento', placeholder:'DD/MM/AAAA' },
+  { id:'telefone',         type:'text',     required:true,  label:'Telefone para contato', sub:'De preferência com WhatsApp.', placeholder:'(11) 99999-9999' },
+  { id:'como_encontrou',   type:'radio',    required:true,  label:'Por onde ficou sabendo do meu trabalho?',
+    opts:['Instagram','Google','Indicação de amigo ou familiar','Indicação de outro profissional','Outro'] },
+  { id:'para_quem',        type:'radio',    required:true,  label:'A terapia seria para você?',
+    opts:['Sim, para mim','Não, para outra pessoa'] },
+  { id:'idade_paciente',   type:'radio',    required:true,  label:'Qual a faixa etária de quem fará terapia?',
+    opts:['Criança (até 12 anos)','Adolescente (13 a 17 anos)','Adulto jovem (18 a 29 anos)','Adulto (30 a 59 anos)','Idoso (60 anos ou mais)'] },
+  { id:'encaminhamento',   type:'radio',    required:true,  label:'Você foi encaminhado(a) por algum médico ou profissional de saúde?',
+    opts:['Sim','Não'] },
+  { id:'encaminhamento_info', type:'radio', required:false, label:'Qual profissional te encaminhou?',
+    opts:['Clínico Geral','Psiquiatra','Neurologista','Pediatra','Outro profissional de saúde'] },
+  { id:'diagnostico',      type:'checkbox', required:false, grid:true, label:'Existe algum diagnóstico prévio?', sub:'Pode marcar mais de um. Se não houver diagnóstico, clique em OK para continuar.',
+    opts:['Ansiedade (TAG)','Depressão','TDAH','Autismo (TEA)','TOC','Transtorno de Pânico','Fobia Social','Outro'] },
+  { id:'queixa',           type:'textarea', required:true,  label:'O que te trouxe até aqui?', placeholder:'Descreva brevemente o que está sentindo ou o que motivou essa busca…' },
+  { id:'terapia_antes',    type:'radio',    required:true,  label:'Já fez terapia antes?',
+    opts:['Sim, e foi positivo','Sim, mas não tive bons resultados','Não, é minha primeira vez','Estava em terapia e precisei pausar'] },
+  { id:'sintomas',         type:'checkbox', required:true,  grid:true, label:'Quais sintomas você tem sentido?', sub:'Pode marcar mais de um.',
+    opts:['Crises de ansiedade','Preocupação constante','Pensamentos acelerados','Dificuldade para dormir','Medo excessivo','Irritabilidade ou tensão','Tristeza excessiva ou vazio','Choro fácil ou sem motivo','Falta de motivação ou prazer','Isolamento social','Pensamentos negativos sobre si mesmo','Dificuldade de tomar decisões','Memória ou concentração prejudicadas','Impulsividade ou agitação','Sintomas físicos (coração acelerado, falta de ar…)'] },
+  { id:'modalidade',       type:'radio',    required:true,  label:'Como prefere ser atendido(a)?',
+    opts:['Presencial em Jarinu','Online','Sem preferência'] },
+  { id:'dias',             type:'checkbox', required:false, grid:true, label:'Quais dias têm disponibilidade?', sub:'Disponibilizo dois horários semanais de 20 min para uma conversa inicial. Confirmarei com você antes.',
+    opts:['Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado'] },
+  { id:'horario',          type:'radio',    required:true,  label:'Melhor horário para falarmos?',
+    opts:['Manhã (8h–12h)','Tarde (12h–18h)','Noite (18h–21h)'] },
+  { type:'lgpd' },
+  { type:'outro' }
+];
+
+const answers = {};
+let current = 0;
+const total = QUESTIONS.filter(q => !['intro','outro','lgpd'].includes(q.type)).length;
+
+const stage       = document.getElementById('stage');
+const progressBar = document.getElementById('progress-bar');
+const stepLabel   = document.getElementById('step-label');
+const btnPrev     = document.getElementById('btn-prev');
+const btnNextArr  = document.getElementById('btn-next-arr');
+
+function questionNumber(idx) {
+  let n = 0;
+  for (let i = 1; i < idx; i++) if (!['intro','outro','lgpd'].includes(QUESTIONS[i].type)) n++;
+  return n + 1;
+}
+
+function progress() {
+  if (current === 0) return 0;
+  if (current >= QUESTIONS.length - 1) return 100;
+  const n = QUESTIONS.slice(1, current).filter(q => !['lgpd'].includes(q.type)).length;
+  return Math.round((n / total) * 100);
+}
+
+function updateNav() {
+  progressBar.style.width = progress() + '%';
+  btnPrev.disabled = current === 0;
+  btnNextArr.disabled = current >= QUESTIONS.length - 1;
+  const q = QUESTIONS[current];
+  const sp = ['intro','outro','lgpd'].includes(q.type);
+  stepLabel.textContent = sp ? '' : (questionNumber(current) + ' de ' + total);
+  document.getElementById('nav-arrows').style.display = q.type === 'outro' ? 'none' : 'flex';
+}
+
+function chk() { return '<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3.5"><polyline points="20 6 9 17 4 12"/></svg>'; }
+function arr() { return '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>'; }
+
+function shouldSkip(idx) {
+  const q = QUESTIONS[idx];
+  if (!q) return false;
+  if (q.id === 'encaminhamento_info' && answers['encaminhamento'] !== 'Sim') return true;
+  return false;
+}
+
+function goTo(idx) {
+  if (idx < 0 || idx >= QUESTIONS.length) return;
+  const dir = idx > current ? 1 : -1;
+  while (idx > 0 && idx < QUESTIONS.length - 1 && shouldSkip(idx)) idx += dir;
+  const card = stage.querySelector('.q-card, .screen');
+  if (card) { card.classList.add('exit'); setTimeout(() => { current = idx; renderQuestion(idx); }, 280); }
+  else { current = idx; renderQuestion(idx); }
+}
+
+function renderQuestion(idx) {
+  const q = QUESTIONS[idx];
+  const card = document.createElement('div');
+
+  // INTRO
+  if (q.type === 'intro') {
+    card.className = 'screen';
+    card.innerHTML =
+      '<span class="badge-pill">Psicologia Real</span>' +
+      '<h1>Primeiro contato<br><em style="font-style:italic;font-weight:300">com Michelle Donegá</em></h1>' +
+      '<div class="welcome-box">Você não precisa continuar carregando sozinho o peso da ansiedade.<br><br>Este espaço foi criado para quem está cansado de se sentir sobrecarregado, com a mente acelerada e sem saber por onde começar.<br><br>Responda com calma. Não há resposta certa — apenas a sua história.</div>' +
+      '<div style="text-align:center;margin-bottom:18px"><button class="btn-next" id="start-btn">Começar ' + arr() + '</button></div>' +
+      '<p class="signature" style="text-align:center"><strong>Michelle Donegá | Psicóloga TCC 🤎</strong><br>CRP 06/93008 · Online e Presencial em Jarinu</p>';
+    stage.innerHTML = ''; stage.appendChild(card);
+    document.getElementById('start-btn').addEventListener('click', () => goTo(1));
+    updateNav(); return;
+  }
+
+  // LGPD
+  if (q.type === 'lgpd') {
+    card.className = 'screen';
+    card.innerHTML =
+      '<span class="badge-pill">Privacidade</span>' +
+      '<h1 style="font-size:clamp(1.5rem,4vw,2rem);margin-bottom:16px">Quase pronto.</h1>' +
+      '<p style="font-size:.88rem">Antes de finalizar, preciso da sua autorização.</p>' +
+      '<div class="lgpd-box"><label class="lgpd-check"><input type="checkbox" id="lgpd-check"><span>Declaro que autorizo o uso das informações fornecidas neste formulário para os fins exclusivos do processo terapêutico, conforme a <strong>Lei Geral de Proteção de Dados (LGPD)</strong>, garantindo a confidencialidade e segurança dos meus dados pessoais.</span></label></div>' +
+      '<div class="err-msg" id="err-lgpd">Por favor, aceite os termos para continuar.</div>' +
+      '<div class="action-row"><button class="btn-next" id="btn-lgpd-ok">Confirmar ' + arr() + '</button></div>';
+    stage.innerHTML = ''; stage.appendChild(card);
+    document.getElementById('btn-lgpd-ok').addEventListener('click', () => {
+      const cb = document.getElementById('lgpd-check');
+      const err = document.getElementById('err-lgpd');
+      if (!cb.checked) { err.style.display = 'block'; return; }
+      err.style.display = 'none'; answers['lgpd'] = true; goTo(current + 1);
+    });
+    updateNav(); return;
+  }
+
+  // OUTRO
+  if (q.type === 'outro') {
+    const labels = { nome:'Nome', nascimento:'Nascimento', telefone:'Telefone', como_encontrou:'Como encontrou', para_quem:'Terapia para quem', para_quem_info:'Dados do paciente', idade_paciente:'Faixa etária', encaminhamento:'Encaminhamento', encaminhamento_info:'Profissional que encaminhou', diagnostico:'Diagnóstico prévio', queixa:'Motivo da busca', terapia_antes:'Terapia anterior', sintomas:'Sintomas', modalidade:'Modalidade', dias:'Dias disponíveis', horario:'Horário preferido' };
+    let msg = '🤎 *Novo contato — Psicologia Real*\n\n';
+    for (const [key, label] of Object.entries(labels)) {
+      const val = answers[key];
+      if (val && (Array.isArray(val) ? val.length > 0 : val !== ''))
+        msg += '*' + label + ':* ' + (Array.isArray(val) ? val.join(', ') : val) + '\n';
+    }
+    msg += '\n_Enviado pelo formulário — Psicologia Real_';
+    const waUrl = 'https://wa.me/5511947388423?text=' + encodeURIComponent(msg);
+    card.className = 'screen';
+    card.innerHTML =
+      '<span class="badge-pill">Recebido</span>' +
+      '<h1>Obrigada por<br>compartilhar comigo.</h1>' +
+      '<p>Entrarei em contato em até <strong>24 horas</strong> pelo WhatsApp para conversarmos e agendarmos nossa primeira sessão.</p>' +
+      '<div style="text-align:center;margin-bottom:20px"><a href="' + waUrl + '" target="_blank" class="btn-next">Enviar pelo WhatsApp ' + arr() + '</a></div>' +
+      '<p class="signature" style="text-align:center"><strong>Michelle Donegá | Psicóloga TCC 🤎</strong></p>' +
+      '<div style="text-align:center;margin-top:18px"><a href="script-whatsapp.html" style="font-size:.76rem;color:var(--base);text-decoration:underline">Abrir script de bate-papo WhatsApp</a></div>';
+    stage.innerHTML = ''; stage.appendChild(card);
+    updateNav(); return;
+  }
+
+  // REGULAR QUESTION
+  const qn = questionNumber(idx);
+  let extraHtml = '';
+  if (q.id === 'para_quem') {
+    extraHtml = '<div class="conditional-block" id="cond-para-quem" style="display:none"><div class="q-sub" style="margin-bottom:10px">Informe o nome, a idade e o motivo do agendamento.</div><textarea class="q-input" id="inp-para_quem_info" placeholder="Ex: Minha filha, 14 anos, ansiedade escolar…" rows="3"></textarea></div>';
+  }
+
+  card.className = 'q-card';
+  card.innerHTML =
+    '<div class="q-number">' + String(qn).padStart(2,'0') + '</div>' +
+    '<div class="q-label">' + q.label + (!q.required ? '<span class="optional">(opcional)</span>' : '') + '</div>' +
+    (q.sub ? '<div class="q-sub">' + q.sub + '</div>' : '') +
+    buildOpts(q) +
+    extraHtml +
+    '<div class="err-msg" id="err-' + q.id + '">Por favor, preencha este campo para continuar.</div>' +
+    '<div class="action-row"><button class="btn-next" id="btn-ok">OK ' + arr() + '</button><span class="hint">ou <kbd>Enter ↵</kbd></span></div>';
+
+  stage.innerHTML = ''; stage.appendChild(card);
+  restoreAnswer(q);
+  bindOpts(q);
+  document.getElementById('btn-ok').addEventListener('click', () => validateAndNext(q));
+  updateNav();
+}
+
+function buildOpts(q) {
+  if (q.type === 'text')     return '<input class="q-input" id="inp-' + q.id + '" type="text" placeholder="' + (q.placeholder||'') + '" autocomplete="off">';
+  if (q.type === 'textarea') return '<textarea class="q-input" id="inp-' + q.id + '" placeholder="' + (q.placeholder||'') + '" rows="3"></textarea>';
+  if (q.type === 'radio' || q.type === 'checkbox') {
+    const cls = q.grid ? 'options grid-2' : 'options';
+    return '<div class="' + cls + '" id="opts-' + q.id + '">' +
+      q.opts.map(o => '<div class="opt" data-val="' + o + '"><div class="key">' + chk() + '</div><label>' + o + '</label></div>').join('') +
+    '</div>';
+  }
+  return '';
+}
+
+function restoreAnswer(q) {
+  const s = answers[q.id]; if (!s) return;
+  if (q.type === 'text' || q.type === 'textarea') { const el = document.getElementById('inp-' + q.id); if (el) el.value = s; }
+  if (q.type === 'radio')    document.querySelectorAll('#opts-' + q.id + ' .opt').forEach(o => { if (o.dataset.val === s) o.classList.add('selected'); });
+  if (q.type === 'checkbox') document.querySelectorAll('#opts-' + q.id + ' .opt').forEach(o => { if (s.includes(o.dataset.val)) o.classList.add('selected'); });
+  if (q.id === 'para_quem' && s === 'Não, para outra pessoa') {
+    const cond = document.getElementById('cond-para-quem'); if (cond) cond.style.display = 'block';
+    if (answers['para_quem_info']) { const el = document.getElementById('inp-para_quem_info'); if (el) el.value = answers['para_quem_info']; }
+  }
+}
+
+function bindOpts(q) {
+  if (q.type === 'text' || q.type === 'textarea') { const el = document.getElementById('inp-' + q.id); if (el) el.focus(); return; }
+  const container = document.getElementById('opts-' + q.id); if (!container) return;
+  container.querySelectorAll('.opt').forEach(opt => {
+    opt.addEventListener('click', () => {
+      if (q.type === 'radio') {
+        container.querySelectorAll('.opt').forEach(o => o.classList.remove('selected'));
+        opt.classList.add('selected');
+        if (q.id === 'para_quem') {
+          const cond = document.getElementById('cond-para-quem');
+          if (cond) cond.style.display = opt.dataset.val === 'Não, para outra pessoa' ? 'block' : 'none';
+          if (opt.dataset.val !== 'Não, para outra pessoa') setTimeout(() => validateAndNext(q), 320);
+        } else {
+          setTimeout(() => validateAndNext(q), 320);
+        }
+      } else {
+        opt.classList.toggle('selected');
+      }
+    });
+  });
+}
+
+function getValue(q) {
+  if (q.type === 'text' || q.type === 'textarea') { const el = document.getElementById('inp-' + q.id); return el ? el.value.trim() : ''; }
+  if (q.type === 'radio')    { const s = document.querySelector('#opts-' + q.id + ' .opt.selected'); return s ? s.dataset.val : ''; }
+  if (q.type === 'checkbox') { return [...document.querySelectorAll('#opts-' + q.id + ' .opt.selected')].map(o => o.dataset.val); }
+  return '';
+}
+
+function validateAndNext(q) {
+  const val = getValue(q);
+  const errEl = document.getElementById('err-' + q.id);
+  const empty = Array.isArray(val) ? val.length === 0 : val === '';
+  if (q.required && empty) { if (errEl) errEl.style.display = 'block'; return; }
+  if (errEl) errEl.style.display = 'none';
+  answers[q.id] = val;
+  if (q.id === 'para_quem' && val === 'Não, para outra pessoa') {
+    const el = document.getElementById('inp-para_quem_info');
+    if (el) answers['para_quem_info'] = el.value.trim();
+  }
+  goTo(current + 1);
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Enter') return;
+  const q = QUESTIONS[current];
+  if (!q || ['intro','outro','lgpd'].includes(q.type)) return;
+  if (q.type === 'textarea' && e.shiftKey) return;
+  if (q.type === 'textarea') e.preventDefault();
+  validateAndNext(q);
+});
+
+btnPrev.addEventListener('click',    () => { if (current > 0) goTo(current - 1); });
+btnNextArr.addEventListener('click', () => {
+  const q = QUESTIONS[current];
+  if (!q || ['intro','outro','lgpd'].includes(q.type)) return;
+  validateAndNext(q);
+});
+
+renderQuestion(0);
+</script>
+</body>
+</html>
