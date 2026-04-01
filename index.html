@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Primeiro Contato — Psicologia Real</title>
+<title>Psicologia Real — Primeiro Contato</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -72,6 +72,14 @@
   .nav-arr:hover { border-color:var(--primary); }
   .nav-arr:disabled { opacity:.25; pointer-events:none; }
   .err-msg { font-size:.76rem; color:#b03a2e; margin-top:8px; display:none; }
+  .profile-grid { display:flex; flex-direction:column; gap:14px; margin-bottom:28px; }
+  .profile-card { display:flex; align-items:flex-start; gap:16px; padding:18px 20px; border:1px solid var(--border); border-radius:12px; cursor:pointer; transition:all .2s; background:rgba(242,233,216,.55); }
+  .profile-card:hover { border-color:var(--base); background:rgba(255,255,255,.6); transform:translateY(-1px); }
+  .profile-icon { width:38px; height:38px; border-radius:8px; background:rgba(106,79,60,.1); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .profile-icon svg { width:18px; height:18px; stroke:var(--primary); }
+  .profile-text strong { display:block; font-size:.92rem; font-weight:500; color:var(--primary); margin-bottom:3px; }
+  .profile-text span { font-size:.78rem; color:var(--text-light); line-height:1.5; }
+  .btn-voltar { background:transparent; border:none; font-size:.8rem; color:var(--text-light); cursor:pointer; text-decoration:underline; font-family:'DM Sans',sans-serif; }
 </style>
 </head>
 <body>
@@ -89,49 +97,103 @@
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
   </button>
 </div>
-
 <script>
-const QUESTIONS = [
-  { type: 'intro' },
-  { id:'nome',             type:'text',     required:true,  label:'Qual é o seu nome completo?', placeholder:'Digite seu nome…' },
+const WA = '5511947388423';
+
+const Q_PACIENTE = [
+  { type:'intro', perfil:'paciente' },
+  { id:'nome',             type:'text',     required:true,  label:'Qual é o seu nome completo?', placeholder:'Digite seu nome...' },
   { id:'nascimento',       type:'text',     required:true,  label:'Data de nascimento', placeholder:'DD/MM/AAAA' },
   { id:'telefone',         type:'text',     required:true,  label:'Telefone para contato', sub:'De preferência com WhatsApp.', placeholder:'(11) 99999-9999' },
+  { id:'tipo_terapia',      type:'radio',    required:true,  label:'Qual tipo de atendimento você está buscando?',
+    opts:['Terapia infantil','Terapia para adolescente','Terapia de casal','Terapia individual (adulto)','Focada na carreira e desenvolvimento','Focada em ansiedade e autoregulação'] },
   { id:'como_encontrou',   type:'radio',    required:true,  label:'Por onde ficou sabendo do meu trabalho?',
     opts:['Instagram','Google','Indicação de amigo ou familiar','Indicação de outro profissional','Outro'] },
   { id:'para_quem',        type:'radio',    required:true,  label:'A terapia seria para você?',
     opts:['Sim, para mim','Não, para outra pessoa'] },
-  { id:'idade_paciente',   type:'radio',    required:true,  label:'Qual a faixa etária de quem fará terapia?',
-    opts:['Criança (até 12 anos)','Adolescente (13 a 17 anos)','Adulto jovem (18 a 29 anos)','Adulto (30 a 59 anos)','Idoso (60 anos ou mais)'] },
   { id:'encaminhamento',   type:'radio',    required:true,  label:'Você foi encaminhado(a) por algum médico ou profissional de saúde?',
     opts:['Sim','Não'] },
   { id:'encaminhamento_info', type:'radio', required:false, label:'Qual profissional te encaminhou?',
     opts:['Clínico Geral','Psiquiatra','Neurologista','Pediatra','Outro profissional de saúde'] },
-  { id:'diagnostico',      type:'checkbox', required:false, grid:true, label:'Existe algum diagnóstico prévio?', sub:'Pode marcar mais de um. Se não houver diagnóstico, clique em OK para continuar.',
+  { id:'diagnostico',      type:'checkbox', required:false, grid:true, label:'Existe algum diagnóstico prévio?', sub:'Pode marcar mais de um. Se não houver, clique em OK para continuar.',
     opts:['Ansiedade (TAG)','Depressão','TDAH','Autismo (TEA)','TOC','Transtorno de Pânico','Fobia Social','Outro'] },
-  { id:'queixa',           type:'textarea', required:true,  label:'O que te trouxe até aqui?', placeholder:'Descreva brevemente o que está sentindo ou o que motivou essa busca…' },
+  { id:'queixa',           type:'textarea', required:true,  label:'O que te trouxe até aqui?', placeholder:'Descreva brevemente o que está sentindo ou o que motivou essa busca...' },
   { id:'terapia_antes',    type:'radio',    required:true,  label:'Já fez terapia antes?',
     opts:['Sim, e foi positivo','Sim, mas não tive bons resultados','Não, é minha primeira vez','Estava em terapia e precisei pausar'] },
   { id:'sintomas',         type:'checkbox', required:true,  grid:true, label:'Quais sintomas você tem sentido?', sub:'Pode marcar mais de um.',
-    opts:['Crises de ansiedade','Preocupação constante','Pensamentos acelerados','Dificuldade para dormir','Medo excessivo','Irritabilidade ou tensão','Tristeza excessiva ou vazio','Choro fácil ou sem motivo','Falta de motivação ou prazer','Isolamento social','Pensamentos negativos sobre si mesmo','Dificuldade de tomar decisões','Memória ou concentração prejudicadas','Impulsividade ou agitação','Sintomas físicos (coração acelerado, falta de ar…)'] },
+    opts:['Crises de ansiedade','Preocupação constante','Pensamentos acelerados','Dificuldade para dormir','Medo excessivo','Irritabilidade ou tensão','Tristeza excessiva ou vazio','Choro fácil ou sem motivo','Falta de motivação ou prazer','Isolamento social','Pensamentos negativos sobre si mesmo','Dificuldade de tomar decisões','Memória ou concentração prejudicadas','Impulsividade ou agitação','Sintomas físicos (coração acelerado, falta de ar...)'] },
   { id:'modalidade',       type:'radio',    required:true,  label:'Como prefere ser atendido(a)?',
     opts:['Presencial em Jarinu','Online','Sem preferência'] },
   { id:'dias',             type:'checkbox', required:false, grid:true, label:'Quais dias têm disponibilidade?', sub:'Disponibilizo dois horários semanais de 20 min para uma conversa inicial. Confirmarei com você antes.',
     opts:['Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado'] },
   { id:'horario',          type:'radio',    required:true,  label:'Melhor horário para falarmos?',
-    opts:['Manhã (8h–12h)','Tarde (12h–18h)','Noite (18h–21h)'] },
+    opts:['Manhã (8h-12h)','Tarde (12h-18h)','Noite (18h-21h)'] },
   { type:'lgpd' },
-  { type:'outro' }
+  { type:'outro', perfil:'paciente' }
 ];
 
-const answers = {};
+const Q_PSI = [
+  { type:'intro', perfil:'psi' },
+  { id:'nome',              type:'text',     required:true,  label:'Qual é o seu nome completo?', placeholder:'Digite seu nome...' },
+  { id:'crp',               type:'text',     required:true,  label:'Número do CRP', placeholder:'Ex: 06/00000' },
+  { id:'telefone',          type:'text',     required:true,  label:'Telefone (WhatsApp)', placeholder:'(11) 99999-9999' },
+  { id:'tempo_formada',     type:'radio',    required:true,  label:'Há quanto tempo você está formada?',
+    opts:['Menos de 1 ano','1 a 3 anos','3 a 5 anos','Mais de 5 anos'] },
+  { id:'abordagem',         type:'radio',    required:true,  label:'Com qual abordagem você trabalha atualmente?',
+    opts:['TCC','ACT','Psicanálise','Gestalt','Terapia do Esquema','Ainda estou definindo','Outra'] },
+  { id:'atende_hoje',       type:'checkbox', required:true,  grid:true, label:'Quais públicos você atende hoje?', sub:'Pode marcar mais de um.',
+    opts:['Crianças','Adolescentes','Adultos','Casais','Grupos','Ainda não atendo'] },
+  { id:'interesse',         type:'radio',    required:true,  label:'O que você está buscando?',
+    opts:['Supervisão clínica de casos','Mentoria para estruturar a prática','Os dois'] },
+  { id:'maior_dificuldade', type:'radio',    required:true,  label:'Qual é sua maior dificuldade hoje?',
+    opts:['Conduzir sessões com segurança','Formular casos e fazer diagnóstico diferencial','Lidar com casos complexos ou de risco','Estruturar minha prática e identidade clínica','Precificação e captação de pacientes'] },
+  { id:'caso_atual',        type:'textarea', required:false, label:'Tem algum caso que te gera dúvida ou angústia no momento?', sub:'Opcional — não precisa identificar o paciente.', placeholder:'Descreva brevemente a situação...' },
+  { id:'modalidade',        type:'radio',    required:true,  label:'Como prefere o atendimento?',
+    opts:['Online','Presencial em Jarinu','Sem preferência'] },
+  { id:'horario',           type:'radio',    required:true,  label:'Melhor horário para conversarmos?',
+    opts:['Manhã (8h-12h)','Tarde (12h-18h)','Noite (18h-21h)'] },
+  { id:'como_encontrou',    type:'radio',    required:true,  label:'Como ficou sabendo do meu trabalho?',
+    opts:['Instagram','Indicação de colega','Google','Já te conheço pessoalmente','Outro'] },
+  { type:'lgpd' },
+  { type:'outro', perfil:'psi' }
+];
+
+const Q_PRODUTO = [
+  { type:'intro', perfil:'produto' },
+  { id:'nome',        type:'text',     required:true,  label:'Qual é o seu nome?', placeholder:'Digite seu nome...' },
+  { id:'telefone',    type:'text',     required:true,  label:'Telefone (WhatsApp)', placeholder:'(11) 99999-9999' },
+  { id:'produto',     type:'radio',    required:true,  label:'Qual produto você adquiriu ou tem interesse?',
+    opts:['Templates de sites no Canva para psis','Supervisão clínica em TCC (produto digital)','Consultoria & Mentoria Psi Real','Outro produto'] },
+  { id:'motivo',      type:'radio',    required:true,  label:'Como posso te ajudar?',
+    opts:['Não consigo acessar o produto','Tenho dúvida sobre como usar','Quero personalizar / adaptar','Quero comprar mas tenho dúvidas','Outra situação'] },
+  { id:'onde_comprou',type:'radio',    required:false, label:'Por onde você comprou?',
+    opts:['Hotmart','Kiwify','Instagram (link direto)','Ainda não comprei','Não lembro'] },
+  { id:'descricao',   type:'textarea', required:true,  label:'Descreva sua dúvida ou necessidade', placeholder:'Quanto mais detalhes, mais rápido consigo te ajudar...' },
+  { type:'outro', perfil:'produto' }
+];
+
+let perfilAtivo = null;
+let QUESTIONS = [];
+let answers = {};
 let current = 0;
-const total = QUESTIONS.filter(q => !['intro','outro','lgpd'].includes(q.type)).length;
+let total = 0;
 
 const stage       = document.getElementById('stage');
 const progressBar = document.getElementById('progress-bar');
 const stepLabel   = document.getElementById('step-label');
 const btnPrev     = document.getElementById('btn-prev');
 const btnNextArr  = document.getElementById('btn-next-arr');
+
+function initPerfil(perfil) {
+  perfilAtivo = perfil;
+  answers = {};
+  current = 0;
+  if (perfil === 'paciente') QUESTIONS = Q_PACIENTE;
+  else if (perfil === 'psi') QUESTIONS = Q_PSI;
+  else QUESTIONS = Q_PRODUTO;
+  total = QUESTIONS.filter(q => !['intro','outro','lgpd'].includes(q.type)).length;
+  renderQuestion(0);
+}
 
 function questionNumber(idx) {
   let n = 0;
@@ -147,9 +209,10 @@ function progress() {
 }
 
 function updateNav() {
-  progressBar.style.width = progress() + '%';
+  progressBar.style.width = (perfilAtivo ? progress() : 0) + '%';
   btnPrev.disabled = current === 0;
-  btnNextArr.disabled = current >= QUESTIONS.length - 1;
+  btnNextArr.disabled = !perfilAtivo || current >= QUESTIONS.length - 1;
+  if (!perfilAtivo) { stepLabel.textContent = ''; document.getElementById('nav-arrows').style.display = 'flex'; return; }
   const q = QUESTIONS[current];
   const sp = ['intro','outro','lgpd'].includes(q.type);
   stepLabel.textContent = sp ? '' : (questionNumber(current) + ' de ' + total);
@@ -160,8 +223,7 @@ function chk() { return '<svg width="9" height="9" viewBox="0 0 24 24" fill="non
 function arr() { return '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>'; }
 
 function shouldSkip(idx) {
-  const q = QUESTIONS[idx];
-  if (!q) return false;
+  const q = QUESTIONS[idx]; if (!q) return false;
   if (q.id === 'encaminhamento_info' && answers['encaminhamento'] !== 'Sim') return true;
   return false;
 }
@@ -175,25 +237,78 @@ function goTo(idx) {
   else { current = idx; renderQuestion(idx); }
 }
 
+function renderSelect() {
+  perfilAtivo = null; current = 0; QUESTIONS = [];
+  updateNav();
+  const card = document.createElement('div');
+  card.className = 'screen';
+  card.innerHTML =
+    '<span class="badge-pill">Psicologia Real</span>' +
+    '<h1>Olá, seja bem-vindo(a).<br><em style="font-style:italic;font-weight:300">Como posso te ajudar?</em></h1>' +
+    '<p>Escolha o perfil que melhor descreve você:</p>' +
+    '<div class="profile-grid">' +
+      '<div class="profile-card" id="card-paciente">' +
+        '<div class="profile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>' +
+        '<div class="profile-text"><strong>Sou paciente ou responsável</strong><span>Quero agendar uma conversa inicial ou saber mais sobre a terapia.</span></div>' +
+      '</div>' +
+      '<div class="profile-card" id="card-psi">' +
+        '<div class="profile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>' +
+        '<div class="profile-text"><strong>Sou psicóloga(o)</strong><span>Tenho interesse em supervisão clínica, mentoria ou desenvolvimento profissional.</span></div>' +
+      '</div>' +
+      '<div class="profile-card" id="card-produto">' +
+        '<div class="profile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></div>' +
+        '<div class="profile-text"><strong>Comprei ou tenho interesse em um produto digital</strong><span>Suporte, dúvidas de acesso, templates ou sistemas.</span></div>' +
+      '</div>' +
+    '</div>' +
+    '<p class="signature" style="text-align:center"><strong>Michelle Donegá | Psicóloga TCC</strong><br>CRP 06/93008 · Online e Presencial em Jarinu</p>';
+  stage.innerHTML = '';
+  stage.appendChild(card);
+  document.getElementById('card-paciente').addEventListener('click', () => startPerfil('paciente'));
+  document.getElementById('card-psi').addEventListener('click',      () => startPerfil('psi'));
+  document.getElementById('card-produto').addEventListener('click',  () => startPerfil('produto'));
+}
+
+function startPerfil(perfil) {
+  const card = stage.querySelector('.screen');
+  if (card) { card.classList.add('exit'); setTimeout(() => initPerfil(perfil), 280); }
+  else initPerfil(perfil);
+}
+
 function renderQuestion(idx) {
   const q = QUESTIONS[idx];
   const card = document.createElement('div');
 
-  // INTRO
   if (q.type === 'intro') {
     card.className = 'screen';
+    let titulo, texto, badge;
+    if (q.perfil === 'paciente') {
+      badge = 'Psicologia Real';
+      titulo = 'Primeiro contato<br><em style="font-style:italic;font-weight:300">com Michelle Donegá</em>';
+      texto = 'Você não precisa continuar carregando sozinho o peso da ansiedade.<br><br>Este espaço foi criado para quem está cansado de se sentir sobrecarregado, com a mente acelerada e sem saber por onde começar.<br><br>Responda com calma. Não há resposta certa — apenas a sua história.';
+    } else if (q.perfil === 'psi') {
+      badge = 'Para psicólogas';
+      titulo = 'Supervisão &amp; Mentoria<br><em style="font-style:italic;font-weight:300">Psicologia Real</em>';
+      texto = 'Clinicar com segurança se constrói com apoio — não sozinha.<br><br>Este espaço é para psicólogas que querem avançar na prática clínica, formular casos com mais precisão e desenvolver uma identidade terapêutica sólida.<br><br>Responda com honestidade. Aqui não há julgamento, há cuidado técnico e afeto profissional.';
+    } else {
+      badge = 'Suporte & Produtos';
+      titulo = 'Como posso<br><em style="font-style:italic;font-weight:300">te ajudar hoje?</em>';
+      texto = 'Se você adquiriu um produto digital, tem dúvidas de acesso, quer personalizar um template ou ainda está avaliando — estou aqui.<br><br>Responda as perguntas a seguir para que eu possa te atender da melhor forma.';
+    }
     card.innerHTML =
-      '<span class="badge-pill">Psicologia Real</span>' +
-      '<h1>Primeiro contato<br><em style="font-style:italic;font-weight:300">com Michelle Donegá</em></h1>' +
-      '<div class="welcome-box">Você não precisa continuar carregando sozinho o peso da ansiedade.<br><br>Este espaço foi criado para quem está cansado de se sentir sobrecarregado, com a mente acelerada e sem saber por onde começar.<br><br>Responda com calma. Não há resposta certa — apenas a sua história.</div>' +
-      '<div style="text-align:center;margin-bottom:18px"><button class="btn-next" id="start-btn">Começar ' + arr() + '</button></div>' +
-      '<p class="signature" style="text-align:center"><strong>Michelle Donegá | Psicóloga TCC 🤎</strong><br>CRP 06/93008 · Online e Presencial em Jarinu</p>';
+      '<span class="badge-pill">' + badge + '</span>' +
+      '<h1>' + titulo + '</h1>' +
+      '<div class="welcome-box">' + texto + '</div>' +
+      '<div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-bottom:18px">' +
+        '<button class="btn-next" id="start-btn">Começar ' + arr() + '</button>' +
+        '<button class="btn-voltar" id="btn-voltar-intro">← Voltar</button>' +
+      '</div>' +
+      '<p class="signature" style="text-align:center"><strong>Michelle Donegá | Psicóloga TCC</strong><br>CRP 06/93008 · Online e Presencial em Jarinu</p>';
     stage.innerHTML = ''; stage.appendChild(card);
     document.getElementById('start-btn').addEventListener('click', () => goTo(1));
+    document.getElementById('btn-voltar-intro').addEventListener('click', () => { const c = stage.querySelector('.screen'); if(c){c.classList.add('exit');setTimeout(renderSelect,280);}else renderSelect(); });
     updateNav(); return;
   }
 
-  // LGPD
   if (q.type === 'lgpd') {
     card.className = 'screen';
     card.innerHTML =
@@ -213,46 +328,49 @@ function renderQuestion(idx) {
     updateNav(); return;
   }
 
-  // OUTRO
   if (q.type === 'outro') {
-    const labels = { nome:'Nome', nascimento:'Nascimento', telefone:'Telefone', como_encontrou:'Como encontrou', para_quem:'Terapia para quem', para_quem_info:'Dados do paciente', idade_paciente:'Faixa etária', encaminhamento:'Encaminhamento', encaminhamento_info:'Profissional que encaminhou', diagnostico:'Diagnóstico prévio', queixa:'Motivo da busca', terapia_antes:'Terapia anterior', sintomas:'Sintomas', modalidade:'Modalidade', dias:'Dias disponíveis', horario:'Horário preferido' };
-    let msg = '🤎 *Novo contato — Psicologia Real*\n\n';
+    const lbls = {
+      paciente: { nome:'Nome', nascimento:'Nascimento', telefone:'Telefone', tipo_terapia:'Tipo de atendimento', como_encontrou:'Como encontrou', para_quem:'Terapia para quem', para_quem_info:'Dados do paciente', encaminhamento:'Encaminhamento', encaminhamento_info:'Profissional que encaminhou', diagnostico:'Diagnóstico prévio', queixa:'Motivo da busca', terapia_antes:'Terapia anterior', sintomas:'Sintomas', modalidade:'Modalidade', dias:'Dias disponíveis', horario:'Horário preferido' },
+      psi:      { nome:'Nome', crp:'CRP', telefone:'Telefone', tempo_formada:'Tempo de formação', abordagem:'Abordagem', atende_hoje:'Públicos atendidos', interesse:'Busca', maior_dificuldade:'Maior dificuldade', caso_atual:'Caso atual', modalidade:'Modalidade', horario:'Horário', como_encontrou:'Como encontrou' },
+      produto:  { nome:'Nome', telefone:'Telefone', produto:'Produto', motivo:'Motivo do contato', onde_comprou:'Onde comprou', descricao:'Descrição' }
+    };
+    const emojis  = { paciente:'🤎', psi:'📋', produto:'🛍' };
+    const titulos = { paciente:'Novo contato — Paciente', psi:'Novo contato — Psicóloga', produto:'Novo contato — Produto Digital' };
+    const labels  = lbls[q.perfil];
+    let msg = emojis[q.perfil] + ' *' + titulos[q.perfil] + ' — Psicologia Real*\n\n';
     for (const [key, label] of Object.entries(labels)) {
       const val = answers[key];
       if (val && (Array.isArray(val) ? val.length > 0 : val !== ''))
         msg += '*' + label + ':* ' + (Array.isArray(val) ? val.join(', ') : val) + '\n';
     }
     msg += '\n_Enviado pelo formulário — Psicologia Real_';
-    const waUrl = 'https://wa.me/5511947388423?text=' + encodeURIComponent(msg);
+    const waUrl = 'https://wa.me/' + WA + '?text=' + encodeURIComponent(msg);
     card.className = 'screen';
     card.innerHTML =
       '<span class="badge-pill">Recebido</span>' +
       '<h1>Obrigada por<br>compartilhar comigo.</h1>' +
-      '<p>Entrarei em contato em até <strong>24 horas</strong> pelo WhatsApp para conversarmos e agendarmos nossa primeira sessão.</p>' +
+      '<p>Entrarei em contato em até <strong>24 horas</strong> pelo WhatsApp para conversarmos.</p>' +
       '<div style="text-align:center;margin-bottom:20px"><a href="' + waUrl + '" target="_blank" class="btn-next">Enviar pelo WhatsApp ' + arr() + '</a></div>' +
-      '<p class="signature" style="text-align:center"><strong>Michelle Donegá | Psicóloga TCC 🤎</strong></p>' +
-      '<div style="text-align:center;margin-top:18px"><a href="script-whatsapp.html" style="font-size:.76rem;color:var(--base);text-decoration:underline">Abrir script de bate-papo WhatsApp</a></div>';
+      '<div style="text-align:center;margin-bottom:18px"><button class="btn-voltar" id="btn-voltar-fim">← Voltar ao início</button></div>' +
+      '<p class="signature" style="text-align:center"><strong>Michelle Donegá | Psicóloga TCC</strong></p>';
     stage.innerHTML = ''; stage.appendChild(card);
+    document.getElementById('btn-voltar-fim').addEventListener('click', () => { const c = stage.querySelector('.screen'); if(c){c.classList.add('exit');setTimeout(renderSelect,280);}else renderSelect(); });
     updateNav(); return;
   }
 
-  // REGULAR QUESTION
   const qn = questionNumber(idx);
   let extraHtml = '';
   if (q.id === 'para_quem') {
-    extraHtml = '<div class="conditional-block" id="cond-para-quem" style="display:none"><div class="q-sub" style="margin-bottom:10px">Informe o nome, a idade e o motivo do agendamento.</div><textarea class="q-input" id="inp-para_quem_info" placeholder="Ex: Minha filha, 14 anos, ansiedade escolar…" rows="3"></textarea></div>';
+    extraHtml = '<div class="conditional-block" id="cond-para-quem" style="display:none"><div class="q-sub" style="margin-bottom:10px">Informe o nome, a idade e o motivo do agendamento.</div><textarea class="q-input" id="inp-para_quem_info" placeholder="Ex: Minha filha, 14 anos, ansiedade escolar..." rows="3"></textarea></div>';
   }
-
   card.className = 'q-card';
   card.innerHTML =
     '<div class="q-number">' + String(qn).padStart(2,'0') + '</div>' +
     '<div class="q-label">' + q.label + (!q.required ? '<span class="optional">(opcional)</span>' : '') + '</div>' +
     (q.sub ? '<div class="q-sub">' + q.sub + '</div>' : '') +
-    buildOpts(q) +
-    extraHtml +
+    buildOpts(q) + extraHtml +
     '<div class="err-msg" id="err-' + q.id + '">Por favor, preencha este campo para continuar.</div>' +
-    '<div class="action-row"><button class="btn-next" id="btn-ok">OK ' + arr() + '</button><span class="hint">ou <kbd>Enter ↵</kbd></span></div>';
-
+    '<div class="action-row"><button class="btn-next" id="btn-ok">OK ' + arr() + '</button><span class="hint">ou <kbd>Enter</kbd></span></div>';
   stage.innerHTML = ''; stage.appendChild(card);
   restoreAnswer(q);
   bindOpts(q);
@@ -327,7 +445,7 @@ function validateAndNext(q) {
 }
 
 document.addEventListener('keydown', e => {
-  if (e.key !== 'Enter') return;
+  if (e.key !== 'Enter' || !perfilAtivo) return;
   const q = QUESTIONS[current];
   if (!q || ['intro','outro','lgpd'].includes(q.type)) return;
   if (q.type === 'textarea' && e.shiftKey) return;
@@ -335,14 +453,15 @@ document.addEventListener('keydown', e => {
   validateAndNext(q);
 });
 
-btnPrev.addEventListener('click',    () => { if (current > 0) goTo(current - 1); });
+btnPrev.addEventListener('click',    () => { if (perfilAtivo && current > 0) goTo(current - 1); });
 btnNextArr.addEventListener('click', () => {
+  if (!perfilAtivo) return;
   const q = QUESTIONS[current];
   if (!q || ['intro','outro','lgpd'].includes(q.type)) return;
   validateAndNext(q);
 });
 
-renderQuestion(0);
+renderSelect();
 </script>
 </body>
 </html>
