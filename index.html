@@ -145,6 +145,8 @@ const Q_PSI = [
     opts:['Crianças','Adolescentes','Adultos','Casais','Grupos','Ainda não atendo'] },
   { id:'interesse',         type:'radio',    required:true,  label:'O que você está buscando?',
     opts:['Supervisão clínica de casos','Mentoria para estruturar a prática','Os dois'] },
+  { id:'formato_supervisao', type:'radio',  required:true,  label:'Qual formato de supervisão te interessa?',
+    opts:['Individual','Em grupo','Ambos os formatos'] },
   { id:'maior_dificuldade', type:'radio',    required:true,  label:'Qual é sua maior dificuldade hoje?',
     opts:['Conduzir sessões com segurança','Formular casos e fazer diagnóstico diferencial','Lidar com casos complexos ou de risco','Estruturar minha prática e identidade clínica','Precificação e captação de pacientes'] },
   { id:'caso_atual',        type:'textarea', required:false, label:'Tem algum caso que te gera dúvida ou angústia no momento?', sub:'Opcional — não precisa identificar o paciente.', placeholder:'Descreva brevemente a situação...' },
@@ -331,7 +333,7 @@ function renderQuestion(idx) {
   if (q.type === 'outro') {
     const lbls = {
       paciente: { nome:'Nome', nascimento:'Nascimento', telefone:'Telefone', tipo_terapia:'Tipo de atendimento', como_encontrou:'Como encontrou', para_quem:'Terapia para quem', para_quem_info:'Dados do paciente', encaminhamento:'Encaminhamento', encaminhamento_info:'Profissional que encaminhou', diagnostico:'Diagnóstico prévio', queixa:'Motivo da busca', terapia_antes:'Terapia anterior', sintomas:'Sintomas', modalidade:'Modalidade', dias:'Dias disponíveis', horario:'Horário preferido' },
-      psi:      { nome:'Nome', crp:'CRP', telefone:'Telefone', tempo_formada:'Tempo de formação', abordagem:'Abordagem', atende_hoje:'Públicos atendidos', interesse:'Busca', maior_dificuldade:'Maior dificuldade', caso_atual:'Caso atual', modalidade:'Modalidade', horario:'Horário', como_encontrou:'Como encontrou' },
+      psi:      { nome:'Nome', crp:'CRP', telefone:'Telefone', tempo_formada:'Tempo de formação', abordagem:'Abordagem', atende_hoje:'Públicos atendidos', interesse:'Busca', formato_supervisao:'Formato de supervisão', maior_dificuldade:'Maior dificuldade', caso_atual:'Caso atual', modalidade:'Modalidade', horario:'Horário', como_encontrou:'Como encontrou' },
       produto:  { nome:'Nome', telefone:'Telefone', produto:'Produto', motivo:'Motivo do contato', onde_comprou:'Onde comprou', descricao:'Descrição' }
     };
     const emojis  = { paciente:'🤎', psi:'📋', produto:'🛍' };
