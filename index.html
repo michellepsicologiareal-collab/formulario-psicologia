@@ -174,6 +174,31 @@ const Q_PRODUTO = [
   { type:'outro', perfil:'produto' }
 ];
 
+
+const Q_PALESTRA = [
+  { type:'intro', perfil:'palestra' },
+  { id:'nome',          type:'text',     required:true,  label:'Qual \u00e9 o seu nome?', placeholder:'Digite seu nome...' },
+  { id:'organizacao',   type:'text',     required:false, label:'Empresa, escola ou organiza\u00e7\u00e3o', placeholder:'Nome da institui\u00e7\u00e3o (opcional)...' },
+  { id:'telefone',      type:'text',     required:true,  label:'Telefone (WhatsApp)', placeholder:'(11) 99999-9999' },
+  { id:'tema',          type:'checkbox', required:true,  grid:true, label:'Qual tema de palestra te interessa?', sub:'Pode marcar mais de um.',
+    opts:['Ansiedade e estresse','Burnout e sa\u00fade no trabalho','Relacionamentos e comunica\u00e7\u00e3o','Mulher sobrecarregada','Outro tema'] },
+  { id:'publico',       type:'radio',    required:true,  label:'Para qual p\u00fablico \u00e9 a palestra?',
+    opts:['Colaboradores / empresa','Estudantes (ensino fundamental/m\u00e9dio)','Universit\u00e1rios','Comunidade / evento aberto','Outro p\u00fablico'] },
+  { id:'participantes', type:'radio',    required:true,  label:'Quantos participantes aproximadamente?',
+    opts:['At\u00e9 30 pessoas','30 a 100 pessoas','100 a 300 pessoas','Mais de 300 pessoas','Ainda n\u00e3o sei'] },
+  { id:'duracao',       type:'radio',    required:true,  label:'Qual a dura\u00e7\u00e3o desejada?',
+    opts:['1 hora','A definir'] },
+  { id:'modalidade',    type:'radio',    required:true,  label:'Como seria a palestra?',
+    opts:['Online','Presencial','Ambos os formatos'] },
+  { id:'local',         type:'text',     required:false, label:'Se presencial \u2014 qual cidade ou local?', placeholder:'Ex: S\u00e3o Paulo, Escola X...' },
+  { id:'data_prevista', type:'text',     required:false, label:'Data prevista ou per\u00edodo', placeholder:'Ex: Junho/2025, Semana da Sa\u00fade...' },
+  { id:'observacoes',   type:'textarea', required:false, label:'Observa\u00e7\u00f5es ou contexto adicional', placeholder:'Fique \u00e0 vontade para contar mais sobre o evento, necessidades especiais, tema espec\u00edfico...' },
+  { id:'urgencia',      type:'radio',    required:true,  label:'Qual a urg\u00eancia para receber o or\u00e7amento?',
+    opts:['Urgente \u2014 preciso em at\u00e9 24h','Em breve \u2014 at\u00e9 3 dias est\u00e1 \u00f3timo','Sem pressa \u2014 at\u00e9 1 semana','S\u00f3 estou pesquisando por enquanto'] },
+  { type:'lgpd' },
+  { type:'outro', perfil:'palestra' }
+];
+
 let perfilAtivo = null;
 let QUESTIONS = [];
 let answers = {};
@@ -192,7 +217,8 @@ function initPerfil(perfil) {
   current = 0;
   if (perfil === 'paciente') QUESTIONS = Q_PACIENTE;
   else if (perfil === 'psi') QUESTIONS = Q_PSI;
-  else QUESTIONS = Q_PRODUTO;
+  else if (perfil === 'produto') QUESTIONS = Q_PRODUTO;
+  else QUESTIONS = Q_PALESTRA;
   total = QUESTIONS.filter(q => !['intro','outro','lgpd'].includes(q.type)).length;
   renderQuestion(0);
 }
@@ -261,6 +287,10 @@ function renderSelect() {
         '<div class="profile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></div>' +
         '<div class="profile-text"><strong>Comprei ou tenho interesse em um produto digital</strong><span>Suporte, dúvidas de acesso, templates ou sistemas.</span></div>' +
       '</div>' +
+      '<div class="profile-card" id="card-palestra">' +
+        '<div class="profile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>' +
+        '<div class="profile-text"><strong>Quero contratar uma palestra</strong><span>Palestras de saúde mental para empresas, escolas ou eventos.</span></div>' +
+      '</div>' +
     '</div>' +
     '<p class="signature" style="text-align:center"><strong>Michelle Donegá | Psicóloga TCC</strong><br>CRP 06/93008 · Online e Presencial em Jarinu</p>';
   stage.innerHTML = '';
@@ -268,6 +298,7 @@ function renderSelect() {
   document.getElementById('card-paciente').addEventListener('click', () => startPerfil('paciente'));
   document.getElementById('card-psi').addEventListener('click',      () => startPerfil('psi'));
   document.getElementById('card-produto').addEventListener('click',  () => startPerfil('produto'));
+  document.getElementById('card-palestra').addEventListener('click', () => startPerfil('palestra'));
 }
 
 function startPerfil(perfil) {
@@ -291,10 +322,14 @@ function renderQuestion(idx) {
       badge = 'Para psicólogas';
       titulo = 'Supervisão &amp; Mentoria<br><em style="font-style:italic;font-weight:300">Psicologia Real</em>';
       texto = 'Clinicar com segurança se constrói com apoio — não sozinha.<br><br>Este espaço é para psicólogas que querem avançar na prática clínica, formular casos com mais precisão e desenvolver uma identidade terapêutica sólida.<br><br>Responda com honestidade. Aqui não há julgamento, há cuidado técnico e afeto profissional.';
-    } else {
+    } else if (q.perfil === 'produto') {
       badge = 'Suporte & Produtos';
       titulo = 'Como posso<br><em style="font-style:italic;font-weight:300">te ajudar hoje?</em>';
       texto = 'Se você adquiriu um produto digital, tem dúvidas de acesso, quer personalizar um template ou ainda está avaliando — estou aqui.<br><br>Responda as perguntas a seguir para que eu possa te atender da melhor forma.';
+    } else {
+      badge = 'Palestras de Saúde Mental';
+      titulo = 'Solicitar orçamento<br><em style="font-style:italic;font-weight:300">de palestra</em>';
+      texto = 'Que bom que você chegou até aqui!<br><br>Acredito que falar sobre saúde mental de forma acessível e humana transforma ambientes. Preencha o formulário abaixo e entrarei em contato com uma proposta personalizada para o seu evento.';
     }
     card.innerHTML =
       '<span class="badge-pill">' + badge + '</span>' +
@@ -334,10 +369,11 @@ function renderQuestion(idx) {
     const lbls = {
       paciente: { nome:'Nome', nascimento:'Nascimento', telefone:'Telefone', tipo_terapia:'Tipo de atendimento', como_encontrou:'Como encontrou', para_quem:'Terapia para quem', para_quem_info:'Dados do paciente', encaminhamento:'Encaminhamento', encaminhamento_info:'Profissional que encaminhou', diagnostico:'Diagnóstico prévio', queixa:'Motivo da busca', terapia_antes:'Terapia anterior', sintomas:'Sintomas', modalidade:'Modalidade', dias:'Dias disponíveis', horario:'Horário preferido' },
       psi:      { nome:'Nome', crp:'CRP', telefone:'Telefone', tempo_formada:'Tempo de formação', abordagem:'Abordagem', atende_hoje:'Públicos atendidos', interesse:'Busca', formato_supervisao:'Formato de supervisão', maior_dificuldade:'Maior dificuldade', caso_atual:'Caso atual', modalidade:'Modalidade', horario:'Horário', como_encontrou:'Como encontrou' },
-      produto:  { nome:'Nome', telefone:'Telefone', produto:'Produto', motivo:'Motivo do contato', onde_comprou:'Onde comprou', descricao:'Descrição' }
+      produto:  { nome:'Nome', telefone:'Telefone', produto:'Produto', motivo:'Motivo do contato', onde_comprou:'Onde comprou', descricao:'Descrição' },
+      palestra: { nome:'Nome', organizacao:'Organização', telefone:'Telefone', tema:'Tema(s)', publico:'Público', participantes:'Participantes', duracao:'Duração', modalidade:'Modalidade', local:'Local', data_prevista:'Data prevista', observacoes:'Observações', urgencia:'Urgência do orçamento' }
     };
-    const emojis  = { paciente:'🤎', psi:'📋', produto:'🛍' };
-    const titulos = { paciente:'Novo contato — Paciente', psi:'Novo contato — Psicóloga', produto:'Novo contato — Produto Digital' };
+    const emojis  = { paciente:'🤎', psi:'📋', produto:'🛍', palestra:'🎤' };
+    const titulos = { paciente:'Novo contato — Paciente', psi:'Novo contato — Psicóloga', produto:'Novo contato — Produto Digital', palestra:'Solicitação de Palestra' };
     const labels  = lbls[q.perfil];
     let msg = emojis[q.perfil] + ' *' + titulos[q.perfil] + ' — Psicologia Real*\n\n';
     for (const [key, label] of Object.entries(labels)) {
@@ -350,8 +386,8 @@ function renderQuestion(idx) {
     card.className = 'screen';
     card.innerHTML =
       '<span class="badge-pill">Recebido</span>' +
-      '<h1>Obrigada por<br>compartilhar comigo.</h1>' +
-      '<p>Entrarei em contato em até <strong>24 horas</strong> pelo WhatsApp para conversarmos.</p>' +
+      (q.perfil === 'palestra' ? '<h1>Solicitação<br><em style="font-style:italic;font-weight:300">recebida!</em></h1>' : '<h1>Obrigada por<br>compartilhar comigo.</h1>') +
+      (q.perfil === 'palestra' ? '<p>Vou analisar os detalhes e te enviar uma proposta personalizada conforme a urgência indicada.</p>' : '<p>Entrarei em contato em até <strong>24 horas</strong> pelo WhatsApp para conversarmos.</p>') +
       '<div style="text-align:center;margin-bottom:20px"><a href="' + waUrl + '" target="_blank" class="btn-next">Enviar pelo WhatsApp ' + arr() + '</a></div>' +
       '<div style="text-align:center;margin-bottom:18px"><button class="btn-voltar" id="btn-voltar-fim">← Voltar ao início</button></div>' +
       '<p class="signature" style="text-align:center"><strong>Michelle Donegá | Psicóloga TCC</strong></p>';
